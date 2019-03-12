@@ -1,2 +1,4 @@
 # TriviaGame
-This trivia game prompts the user on sports trivia
+This trivia game prompts the user on sports trivia questions.
+
+
