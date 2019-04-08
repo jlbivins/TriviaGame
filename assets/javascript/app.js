@@ -1,8 +1,8 @@
-//<script type="text/javascript">
+var card = $("#random-question");
 
-  var random_question=[];
-  var random_answer=[];
-  var random_index=0;
+  // var random_question=[];
+  // var random_answer=[];
+  // var random_index=0;
 
 var trivia = [{
     question: 'Who was the running back for the Cowboys 1977-1988, referred to as TD?',
@@ -27,80 +27,75 @@ var trivia = [{
 
 }];
 
-//1.click on start button display questions, and display timer (starts)
-//2.when time runs out or they hit the i am finished button , we want to grade the quesitons
-// 
-//3.then correct question is answered
-//4. when you grade questions:
-//5. display questions
-var countdown=100;
 
+var timer;
 
-$("#random-button").on("click", function() {
-  var ques;
-  $("#random-button").hide();
- var answer = $("input[name=q" + i + "]:checked").val();
-  console.log('answer is: '+ answer);
-  for(var i=0;i<trivia.length;i++){
-    ques=trivia[i];                             //loop thru questions display questions
-    console.log(ques);
-    var new_h2=$("<h2>");  
-    new_h2.html(ques.question);
-    $("#random-question").append(new_h2);
+var game = {
+  correct: 0,
+  incorrect: 0,
+  counter: 60,
 
-    for(var j=0;j<ques.answers.length;j++){
-       var ans='<input type="radio" name="q' +i+ ' "value="'+ques.answers[j]+'">'+ques.answers[j];
-       console.log(ans);
-    $("#random-question").append(ans);
-    
+  countdown: function() {
+    game.counter--;
+    $("#counter-number").html(game.counter);
+    if (game.counter === 0) {
+      console.log("TIME UP");
+      game.done();
+    }
+  },
 
-    } // 2nd end-for 
- 
+  start: function() {
+    timer = setInterval(game.countdown, 1000);
 
-  
-  
-  } // 1st end-for
+    $("#sub-wrapper").prepend(
+      "<h2>Time Remaining: <span id='counter-number'>120</span> Seconds</h2>"
+    );
 
-//****************************************
-//If 'trivia' is our original array of question objects
-var misses=0;
-var correct=0;
-var incorrect=0;
-for(var i = 0; i < trivia.length; i++){
+    $("#start").remove();
 
-// // anwswer will contain the value of the checked input 
-// // or 'undefined' if no input is selected    
-ans = $("input[type='radio'][name=q" + i + "]:checked").val();  //contrary to google, i couldn't get this to work
-                                                                //so i implemented the logic alternatively on line 120
-console.log('answer is: '+ ans);
-	
-//***************************************
+    for (var i = 0; i < trivia.length; i++) {
+      card.append("<h2>" + trivia[i].question + "</h2>");
+      for (var j = 0; j < trivia[i].answers.length; j++) {
+        card.append("<input type='radio' name='question-" + i +
+          "' value='" + trivia[i].answers[j] + "''>" + trivia[i].answers[j]);
+      }
+    }
 
+    card.append("<button id='done'>Done</button>");
+  },
 
-    } //end-for
+  done: function() {
+    var inputs = card.children("input:checked");
+    for (var i = 0; i < inputs.length; i++) {
+      if ($(inputs[i]).val() === trivia[i].correctAnswer) {
+        game.correct++;
+      } else {
+        game.incorrect++;
+      }
+    }
+    this.result();
+  },
+
+  result: function() {
+    clearInterval(timer);
+
+    $("#sub-wrapper h2").remove();
+
+    card.html("<h2>All Done!</h2>");
+    card.append("<h3>Correct Answers: " + this.correct + "</h3>");
+    card.append("<h3>Incorrect Answers: " + this.incorrect + "</h3>");
+  }
+};
+
+// CLICK EVENTS
+
+$(document).on("click", "#start", function() {
+  game.start();
 });
 
-$(document).on('click','input',function(){
- 
- var correct=0 
- var incorrect=0;
-  userAns =  $(this).attr('value')
-  var index =  $(this).attr('name').replace('q', '')
-  console.log(index)
-  if(userAns === trivia[parseInt(index)].correctAnswer){
-    correct++;    
-  } 
-  else{
-     incorrect++;
-  } 
-
-  //missing is logic for scoring the users responses as determined from the if-else condition above
-  //also missing is the timing functionality which gives the user a certain amount of time to answer
-  console.log('correct'+correct);
-  console.log('incorrect'+incorrect);
-  
-})
-
+$(document).on("click", "#done", function() {
+  game.done();
+});
 
  
    
